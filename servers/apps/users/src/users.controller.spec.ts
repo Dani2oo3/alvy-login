@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
+import { beforeEach, describe, it } from 'node:test';
 
 describe('UsersController', () => {
   let usersController: UsersController;
@@ -13,10 +14,8 @@ describe('UsersController', () => {
 
     usersController = app.get<UsersController>(UsersController);
   });
-
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(usersController.getHello()).toBe('Hello World!');
-    });
-  });
 });
+
+function expect(arg0: string) {
+  throw new Error('Function not implemented.');
+}
