@@ -1,18 +1,32 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { EmailService } from './email.service';
+import { MailerService } from '@nestjs-modules/mailer';
+import { Injectable } from '@nestjs/common';
 
-describe('EmailService', () => {
-  let service: EmailService;
+type mailOptions = {
+  subject: string;
+  email: string;
+  name: string;
+  activationCode: string;
+  template: string;
+};
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [EmailService],
-    }).compile();
-
-    service = module.get<EmailService>(EmailService);
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-});
+@Injectable()
+export class EmailService {
+  constructor(private mailService: MailerService) {}
+  async sendMail({
+    subject,
+    email,
+    name,
+    activationCode,
+    template,
+  }: mailOptions) {
+    await this.mailService.sendMail({
+      to: email,
+      subject,
+      template,
+      context: {
+        name,
+        activationCode,
+      },
+    });
+  }
+}
