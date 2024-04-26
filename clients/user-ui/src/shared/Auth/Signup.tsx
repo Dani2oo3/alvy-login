@@ -5,6 +5,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { AiFillGithub, AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { FcGoogle } from "react-icons/fc";
 import { useState } from "react";
+import { useMutation } from "@apollo/client";
+import { REGISTER_USER } from "@/src/graphql/actions/register.action";
+import toast from "react-hot-toast";
 
 const formSchema = z.object({
     name: z.string().min(3, "Name must be at least 3 characters long"),
@@ -13,24 +16,37 @@ const formSchema = z.object({
     phone_number: z.number().min(11, "Phone number must be at least 11 characters!"),
 });
 
-type SignupSchema = z.infer<typeof formSchema>;
+type SignUpSchema = z.infer<typeof formSchema>;
 
-const Signup = ({ setActiveState }: { setActiveState: (e: string) => void }) => {
-    const {
-        register,
-        handleSubmit,
-        formState: { errors, isSubmitting },
-        reset,
-    } = useForm<SignupSchema>({
-        resolver: zodResolver(formSchema),
-    });
+const Signup = ({
+  setActiveState,
+}: {
+  setActiveState: (e: string) => void;
+}) => {
+    const [registerUserMutation, {loading,error,data}] = useMutation(REGISTER_USER);
 
-    const [show, setShow] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<SignUpSchema>({
+    resolver: zodResolver(formSchema),
+  });
+  const [show, setShow] = useState(false);
 
-    const onSubmit = (data: SignupSchema) => {
-        console.log(data);
-        reset();
-    };
+  const onSubmit = async (data: SignUpSchema) => {
+    try {
+        const response = await registerUserMutation({
+            variables: data,
+        })
+        console.log(response.data);
+        toast.success(response.data.message)
+        
+    } catch (error:any) {
+        toast.error(error.message);
+    }
+  };
 
     return (
         <div>
@@ -62,7 +78,7 @@ const Signup = ({ setActiveState }: { setActiveState: (e: string) => void }) => 
                 <div className="w-full relative mt-3">
                     <label className={`${styles.label}`}>Enter your Phone Number</label>
                     <input
-                        {...register("phone_number")}
+                        {...register("phone_number", { valueAsNumber: true })}
                         type="number"
                         placeholder="+8801******"
                         className={`${styles.input}`}
@@ -103,7 +119,7 @@ const Signup = ({ setActiveState }: { setActiveState: (e: string) => void }) => 
                     <input
                         type="submit"
                         value="Sign Up"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || loading}
                         className={`${styles.button} mt-3`}
                     />
                 </div>
